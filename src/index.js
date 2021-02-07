@@ -1,26 +1,51 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import faker from 'faker';
+import { View, Text, Animated, Dimensions} from 'react-native';
+const screenWidth = Dimensions.get('window').width;
 
-const App = () => {
-    return(
-        <div className="ui container comments"> 
-            <div className="comment">
-                <a href="/" className="avatar">
-                    <img alt="avatar" src={faker.image.avatar()}></img>
-                </a>
-                <div className="content">
-                    <a href="/.."className="author"> Sam </a>
-                    <div className="metadata">
-                        <span className="date"> Today at 5:23pm</span>
-                    </div>
-                    <div className="text" > haha</div>
+export default class animatedView extends React.Component {
+  state = {
+    shown: false,
+    animated: new Animated.Value(0),
+  };
 
-                </div>
-            </div>
-        </div>
-    ) 
-        
-};
+  componentDidMount() {
+    this.toggleBar();
+  }
+  toggleBar() {
+    const newState = !this.state.shown;
+    this.setState({ shown: newState });
+    Animated.timing(this.state.animated, {
+      toValue: newState ? 1 : 0,
+      duration: 500,
+    }).start(newState ? this.hideBar() : null);
+  }
+  hideBar() {
+    setTimeout(() => {
+      this.toggleBar();
+    }, 3000);
+  }
 
-ReactDOM.render(<App />, document.querySelector("#root"));
+  render() {
+    return (
+        <View>
+            <Animated.View
+        style={{
+          width: screenWidth,
+          position: 'absolute',
+          bottom: 0,
+          backgroundColor: 'black',
+          flexDirection: 'row',
+          transform: [
+            {
+              translateY: this.state.animated.interpolate({
+                inputRange: [0, 1],
+                outputRange: [300, 0],
+              }),
+            },
+          ],
+        }}
+      ><Text>some Text</Text></Animated.View>
+        </View>
+    );
+    }
+}
